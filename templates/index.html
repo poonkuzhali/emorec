@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatterBot</title>
+</head>
+<body>
+    <h1>ChatterBot</h1>
+    <div id="chat-box">
+        <p>Bot: {{ initial_question }}</p>
+    </div>
+    <input type="text" id="user-input" placeholder="Your response...">
+    <button onclick="sendMessage()" id="send-button">Send</button>
+
+    <script>
+        function sendMessage() {
+            var userMessage = document.getElementById("user-input").value;
+            var chatBox = document.getElementById("chat-box");
+            chatBox.innerHTML += "<p>User: " + userMessage + "</p>";
+
+            if (userMessage.toLowerCase() === "stop") {
+                    chatBox.innerHTML += "<p>Bot: Thank you for chatting with me. Have a great day!</p>";
+                    document.getElementById("user-input").value = "";
+
+                    document.getElementById("user-input").disabled = true;
+                    document.getElementById("send-button").disabled = true;
+            }
+            else {
+
+                var xhr = new XMLHttpRequest();
+                xhr.open("GET", "/get?msg=" + userMessage, true);
+                xhr.onreadystatechange = function() {
+                    if (xhr.readyState == 4 && xhr.status == 200) {
+                        var botResponse = xhr.responseText;
+                        chatBox.innerHTML += "<p>Bot: " + botResponse + "</p>";
+                        document.getElementById("user-input").value = "";
+                }
+            };
+            xhr.send();
+        }
+        }
+    </script>
+</body>
+</html>
