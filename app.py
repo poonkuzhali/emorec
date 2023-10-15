@@ -1,45 +1,50 @@
-from flask import Flask, render_template, request
 from chatterbot import ChatBot
-from chatterbot.trainers import ListTrainer
+from chatterbot.response_selection import get_random_response
+from chatterbot.trainers import ChatterBotCorpusTrainer
+from flask import Flask, render_template, request
 
 app = Flask(__name__)
 
-bot = ChatBot('EmotionBot')
+my_bot = ChatBot(name='QuestionBot',read_only = True,
+                 response_selection_method=get_random_response,
+                 logic_adapters=[
+        # {
+        #     'import_path': 'chatterbot.logic.SpecificResponseAdapter',
+        #     'input_text': '',
+        #     'output_text': 'Thanks for sharing'
+        # },
+        {
+            'import_path': 'chatterbot.logic.BestMatch',
+            'default_response': 'I do not understand. Sorry.',
+            'maximum_similarity_threshold': 0.9
+        },
+        {
+            'import_path': 'chatbot.regex_response_adapter.RegexResponseAdapter'
+        }
+    ]
+    )
 
-trainer = ListTrainer(bot)
+trainer = ChatterBotCorpusTrainer(my_bot)
 
-emotion_questions = [
-    "How are you feeling right now?",
-    "Can you tell me more about what's bothering you?",
-    "What emotions are you experiencing?",
-    "When did you start feeling this way?",
-    "Is there something specific that triggered these emotions?",
-]
-
-trainer.train(emotion_questions)
-
-current_question_index = 0
+trainer.train(
+    "./conversations.yml"
+)
+trainer.train( 'chatterbot.corpus.english.emotion',
+               'chatterbot.corpus.english.conversations')
 
 @app.route('/')
 def index():
-    return render_template('index.html', initial_question=emotion_questions[current_question_index])
+    return render_template('index.html')
 
 @app.route('/get')
 def get_bot_response():
-    global current_question_index
     user_message = request.args.get('msg')
-    bot_response = ""
 
-    if user_message.lower() == 'exit'.lower():
-        bot_response = "Thank you for chatting with me. Have a great day!"
+    if user_message.lower() == 'bye'.lower():
+        bot_response = "Thank you for answering my questions. Have a great day!"
     else:
-        current_question_index += 1
-        if current_question_index < len(emotion_questions):
-            bot_response = emotion_questions[current_question_index]
-        else:
-            bot_response = "Thank you for sharing your feelings. If you have more to talk about, feel free to let me know."
-
-
+        response_statement = my_bot.get_response(user_message)
+        bot_response = response_statement.text
     return bot_response
 
 if __name__ == '__main__':

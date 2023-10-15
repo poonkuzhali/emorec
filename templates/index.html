@@ -8,10 +8,12 @@
 <body>
     <h1>ChatterBot</h1>
     <div id="chat-box">
-        <p>Bot: {{ initial_question }}</p>
+        <p>Bot: Hello there!</p>
     </div>
     <input type="text" id="user-input" placeholder="Your response...">
     <button onclick="sendMessage()" id="send-button">Send</button>
+    <button onclick="startRecording()" id="record-button">Record Audio</button>
+
 
     <script>
         function sendMessage() {
@@ -19,7 +21,7 @@
             var chatBox = document.getElementById("chat-box");
             chatBox.innerHTML += "<p>User: " + userMessage + "</p>";
 
-            if (userMessage.toLowerCase() === "stop") {
+            if (userMessage.toLowerCase() === "bye") {
                     chatBox.innerHTML += "<p>Bot: Thank you for chatting with me. Have a great day!</p>";
                     document.getElementById("user-input").value = "";
 
@@ -27,7 +29,6 @@
                     document.getElementById("send-button").disabled = true;
             }
             else {
-
                 var xhr = new XMLHttpRequest();
                 xhr.open("GET", "/get?msg=" + userMessage, true);
                 xhr.onreadystatechange = function() {
@@ -39,6 +40,30 @@
             };
             xhr.send();
         }
+        }
+        function startRecording() {
+            var recognition = new webkitSpeechRecognition() || SpeechRecognition();
+            recognition.onstart = function() {
+                console.log("Recording started...");
+            };
+
+            recognition.onresult = function(event) {
+                var result = event.results[0][0].transcript;
+                document.getElementById("user-input").value = result;
+                console.log("User said: " + result);
+                var xhr = new XMLHttpRequest();
+                xhr.open("GET", "/get?msg=" + result, true);
+                xhr.onreadystatechange = function() {
+                    if (xhr.readyState == 4 && xhr.status == 200) {
+                        var botResponse = xhr.responseText;
+                        chatBox.innerHTML += "<p>Bot: " + botResponse + "</p>";
+                        document.getElementById("user-input").value = "";
+                }
+            };
+            xhr.send();
+            };
+
+            recognition.start();
         }
     </script>
 </body>
