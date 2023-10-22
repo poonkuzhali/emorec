@@ -2,6 +2,10 @@ from chatterbot import ChatBot
 from chatterbot.response_selection import get_random_response
 from chatterbot.trainers import ChatterBotCorpusTrainer
 from flask import Flask, render_template, request
+from flask_cors import CORS, cross_origin
+app = Flask(__name__)
+cors = CORS(app)
+app.config['CORS_HEADERS'] = 'Content-Type'
 
 app = Flask(__name__)
 
@@ -37,6 +41,7 @@ def index():
     return render_template('index.html')
 
 @app.route('/get')
+@cross_origin()
 def get_bot_response():
     user_message = request.args.get('userMessage')
 
@@ -48,4 +53,5 @@ def get_bot_response():
     return bot_response
 
 if __name__ == '__main__':
+
     app.run(debug=True)
