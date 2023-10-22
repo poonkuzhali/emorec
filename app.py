@@ -38,7 +38,7 @@ def index():
 
 @app.route('/get')
 def get_bot_response():
-    user_message = request.args.get('msg')
+    user_message = request.args.get('userMessage')
 
     if user_message.lower() == 'bye'.lower():
         bot_response = "Thank you for answering my questions. Have a great day!"

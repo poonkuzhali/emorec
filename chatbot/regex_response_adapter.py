@@ -23,9 +23,17 @@ class RegexResponseAdapter(LogicAdapter):
             response = "You are amazing!"
             response_statement = Statement(response)
             response_statement.confidence = 1.0
+        elif  re.match(r'My .*', input_text, re.IGNORECASE):
+            response = "Nice to meet you! Do you like games or movies?"
+            response_statement = Statement(response)
+            response_statement.confidence = 1.0
+        elif  re.match(r'I .*', input_text, re.IGNORECASE):
+            response = "Wow okay!"
+            response_statement = Statement(response)
+            response_statement.confidence = 1.0
         else:
             response = 'I do not understand.'
             response_statement = Statement(response)
-            response_statement.confidence = 0.5
+            # response_statement.confidence = 0.2
 
         return response_statement
