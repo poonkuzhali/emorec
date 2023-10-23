@@ -1,4 +1,10 @@
 import React, { Component, ChangeEvent, FormEvent } from "react";
+import axios from "axios";
+import "./chat.css";
+
+const api = axios.create({
+  baseURL: " http://127.0.0.1:5000/",
+});
 
 interface Message {
   text: string;
@@ -8,6 +14,7 @@ interface Message {
 interface ChatbotState {
   messages: Message[];
   userInput: string;
+  botOutput: string | null;
 }
 
 class Chatbot extends Component<{}, ChatbotState> {
@@ -16,6 +23,7 @@ class Chatbot extends Component<{}, ChatbotState> {
     this.state = {
       messages: [],
       userInput: "",
+      botOutput: null,
     };
   }
 
@@ -34,14 +42,44 @@ class Chatbot extends Component<{}, ChatbotState> {
       userInput: "",
     }));
 
-    // Send the user's message to the server
-    const response = await fetch(`/api/chat?message=${userMessage}`);
-    const data = await response.json();
+    let data: any = "thomas"; // For the API response data: testing
+    console.log(data);
 
-    // Update the state with the chatbot's response
-    this.setState((prevState) => ({
-      messages: [...prevState.messages, { text: data.message, isUser: false }],
-    }));
+    try {
+      const response = await api.get(`/get?userMessage=${userMessage}`);
+
+      if (response) {
+        data = response.data;
+        console.log("Here is your data");
+        console.log(data);
+
+        // Update the state with the chatbot's response
+        this.setState((prevState) => ({
+          messages: [...prevState.messages, { text: data.data, isUser: false }],
+          botOutput: data.data,
+        }));
+        if (userMessage.toLowerCase() === "bye") {
+          this.setState({ botOutput: data.data });
+        }
+        // Process and display the bot's response in your React component
+      } else {
+        // Handle the case where the response is undefined or null
+        console.error("No response received from the server.");
+        // You can show an error message to the user or perform other error handling here
+      }
+    } catch (error: any) {
+      // Handle errors
+      if (error.response) {
+        console.error("Server responded with an error:", error.response.data);
+        // You can show an error message to the user or perform other error handling here
+      } else if (error.request) {
+        console.error("No response received:", error.request);
+        // Handle network issues, inform the user, or retry the request
+      } else {
+        console.error("An error occurred:", error.message);
+        // Handle other errors (e.g., unexpected exceptions)
+      }
+    }
   };
 
   render() {
@@ -53,6 +91,7 @@ class Chatbot extends Component<{}, ChatbotState> {
               key={index}
               className={message.isUser ? "user-message" : "chatbot-message"}
             >
+              {message.isUser ? "User: " : "Chatbot: "}
               {message.text}
             </div>
           ))}
@@ -65,6 +104,13 @@ class Chatbot extends Component<{}, ChatbotState> {
           />
           <button type="submit">Send</button>
         </form>
+        {this.state.userInput.toLowerCase() === "bye" &&
+          this.state.botOutput && (
+            <div className="output-box">
+              <p>Bot's Output:</p>
+              <p>{this.state.botOutput}</p>
+            </div>
+          )}
       </div>
     );
   }
