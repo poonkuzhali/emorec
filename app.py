@@ -12,7 +12,7 @@ app = Flask(__name__)
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
 loaded_model = load_model('sentiment_model.h5')
-
+messages = []
 
 my_bot = ChatBot(name='QuestionBot',read_only = True,
                  response_selection_method=get_random_response,
@@ -44,20 +44,22 @@ def index():
 @cross_origin()
 def get_bot_response():
     user_message = request.args.get('userMessage')
+    messages.append([user_message])
 
     if user_message.lower() == 'bye'.lower():
-        bot_response = "Thank you for answering my questions. Have a great day!"
+        emotions = get_emotions()
+        bot_response = emotions
     else:
         response_statement = my_bot.get_response(user_message)
         bot_response = response_statement.text
     return bot_response
 
-@app.route('/predict', methods=['GET'])
-@cross_origin()
+# @app.route('/predict', methods=['GET'])
+# @cross_origin()
 def get_emotions():
-    user_messages = request.args.get('messages')
+    # user_messages = request.args.get('messages')
     # predict_emotions([['My dog fell sick'], ['Hi dude']], loaded_model)
-    emotions = predict_emotions(user_messages, loaded_model)
+    emotions = predict_emotions(messages, loaded_model)
     return jsonify({"emotions": emotions})
 
 
