@@ -1,40 +1,35 @@
-from chatterbot import ChatBot
-from chatterbot.response_selection import get_random_response
-from chatterbot.trainers import ChatterBotCorpusTrainer
-from flask import Flask, render_template, request, jsonify
+import pickle
+import re
+
+import numpy as np
+from flask import Flask, render_template, jsonify, request
 from flask_cors import CORS, cross_origin
 from keras.models import load_model
-
-from sentiment_model.prediction import predict_emotions
+from keras.src.utils import pad_sequences
+import openai
 
 app = Flask(__name__)
 
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
-loaded_model = load_model('sentiment_model.h5')
-messages = []
+loaded_model = load_model('./sentiment_model/Emotion_Recognition.h5')
 
-my_bot = ChatBot(name='QuestionBot',read_only = True,
-                 response_selection_method=get_random_response,
-                 logic_adapters=[
-        {
-            'import_path': 'chatterbot.logic.BestMatch',
-            'default_response': 'I do not understand. Sorry.',
-            'maximum_similarity_threshold': 0.9
-        },
-        {
-            'import_path': 'chatbot.regex_response_adapter.RegexResponseAdapter'
-        }
-    ]
-    )
+openai.api_key = "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"
 
-trainer = ChatterBotCorpusTrainer(my_bot)
+messages = [
+    {"role": "system", "content": "Interact with user and ask them about their day and what they have been upto"}]
+userMessages = []
 
-# trainer.train(
-#     "./conversations.yml"
-# )
-# trainer.train( 'chatterbot.corpus.english.emotion',
-#                'chatterbot.corpus.english.conversations')
+def main():
+    while input != "bye":
+        message = input()
+        messages.append({"role": "user", "content": message})
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=messages)
+        reply = response["choices"][0]["message"]["content"]
+        messages.append({"role": "assistant", "content": reply})
+        print("\n" + reply + "\n")
 
 @app.route('/')
 def index():
@@ -43,24 +38,38 @@ def index():
 @app.route('/get', methods=['GET'])
 @cross_origin()
 def get_bot_response():
-    user_message = request.args.get('userMessage')
-    messages.append([user_message])
+    message = request.args.get('userMessage')
+    if message.lower() == 'bye':
+        return get_emotions()
+    userMessages.append(message)
+    messages.append({"role": "user", "content": message if message else ""})
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=messages)
+    reply = response["choices"][0]["message"]["content"]
+    messages.append({"role": "assistant", "content": reply})
+    return reply
 
-    if user_message.lower() == 'bye'.lower():
-        emotions = get_emotions()
-        bot_response = emotions
-    else:
-        response_statement = my_bot.get_response(user_message)
-        bot_response = response_statement.text
-    return bot_response
-
-# @app.route('/predict', methods=['GET'])
-# @cross_origin()
 def get_emotions():
-    # user_messages = request.args.get('messages')
-    # predict_emotions([['My dog fell sick'], ['Hi dude']], loaded_model)
-    emotions = predict_emotions(messages, loaded_model)
-    return jsonify({"emotions": emotions})
+    with open(r"./sentiment_model/labelEncoder.pickle", "rb") as input_file:
+        le = pickle.load(input_file)
+    with open(r"./sentiment_model/tokenizer.pickle", "rb") as input_file:
+        tokenizer = pickle.load(input_file)
+
+    sentence = ' '.join(userMessages)
+    print(sentence)
+    sentence = clean(sentence)
+    sentence = tokenizer.texts_to_sequences([sentence])
+    sentence = pad_sequences(sentence, maxlen=256, truncating='pre')
+    result = le.inverse_transform(np.argmax(loaded_model.predict(sentence), axis=-1))[0]
+    proba = np.max(loaded_model.predict(sentence))
+    print(f"{result} : {proba}\n\n")
+    return jsonify({"emotions": result})
+
+def clean(text):
+    text = re.sub(r'[^a-zA-Z ]', '', text)
+    text = text.lower()
+    return text
 
 
 if __name__ == '__main__':
