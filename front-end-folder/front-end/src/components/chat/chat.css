@@ -1,44 +1,67 @@
 /* Chatbox container */
 .chatbox {
+  display: flex;
+  flex-direction: column;
   background-color: #f1f1f1;
   border: 1px solid #ccc;
   padding: 10px;
-  margin: 10px 0;
-  max-height: 300px;
+  margin: 50px 0;
+  max-height: 500px;
   overflow-y: scroll;
+  scroll-behavior: smooth; /* Enable smooth scrolling */
 }
 
 /* Message container styling */
 .message-container {
-  margin: 5px;
-  padding: 5px;
-  border-radius: 8px;
-  background-color: #b0e0e6; /* User message background color */
   display: flex;
-  justify-content: flex-end;
+  flex-direction: column;
+  gap: 5px;
 }
 
 /* User message styling */
 .user-message {
+  align-self: flex-end;
   max-width: 70%;
+  background-color: #b0e0e6; /* User message background color */
+  border-radius: 8px;
+  padding: 10px;
+  word-wrap: break-word;
 }
 
 /* Chatbot message styling */
 .chatbot-message {
+  align-self: flex-start;
   max-width: 70%;
   background-color: #c9e2c3; /* Chatbot message background color */
+  border-radius: 8px;
+  padding: 10px;
+  word-wrap: break-word;
 }
 
-/* Form input and submit button */
-form input[type="text"] {
-  width: 80%;
+/* Input container */
+.input-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  background-color: #f1f1f1;
+  position: fixed; /* Position the form at the bottom */
+  bottom: 0; /* Align it to the bottom of the viewport */
+  width: 100%; /* Occupy the full width */
+  z-index: 1; /* Ensure it's above other content, adjust as needed */
+}
+
+/* Input field */
+.input-field {
+  flex: 1; /* Expand to take available space */
   padding: 10px;
   border: 1px solid #ccc;
   border-radius: 5px;
   margin-right: 10px;
 }
 
-form button[type="submit"] {
+/* Send button */
+.send-button {
   background-color: #4caf50;
   color: white;
   padding: 10px 20px;
@@ -47,22 +70,66 @@ form button[type="submit"] {
   cursor: pointer;
 }
 
-/* Output box styling */
-.output-box {
-  margin: 20px 0;
-  background-color: #f5f5f5;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  padding: 10px;
+/* modal.css */
+
+/* Styles for the modal overlay */
+.custom-overlay {
+  background-color: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* Output message styling */
-.output-box p {
-  margin: 0;
+/* Styles for the modal content */
+.custom-modal {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  padding: 20px;
+  max-width: 400px;
+  width: 100%;
+  text-align: center;
 }
 
-/* Bot's Output styling */
-.output-box p:first-child {
+/* Styles for the modal heading */
+.modal-heading {
+  font-size: 1.2rem;
   font-weight: bold;
-  margin-bottom: 5px;
+  margin-bottom: 10px;
+}
+
+/* Styles for the emotion text */
+.emotion-text {
+  font-size: 1rem;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+/* Styles for the close button */
+.close-button {
+  background-color: #3498db;
+  color: #fff;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.close-button:hover {
+  background-color: #217dbb;
+}
+
+/* Styles for the Spotify link */
+.spotify-link {
+  display: block;
+  margin-top: 20px;
+  text-decoration: none;
+  color: #3498db;
+  font-weight: bold;
+  transition: color 0.3s ease;
+}
+
+.spotify-link:hover {
+  color: #217dbb;
 }

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   MDBBtn,
   MDBContainer,
@@ -8,7 +8,29 @@ import {
   MDBInput,
 } from "mdb-react-ui-kit";
 
+// Import your image
+
 function App() {
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+
+  const handleInputChange = (e: any) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+  };
+
+  const handleLogin = () => {
+    // Use formData.email and formData.password for login logic
+    console.log("Email:", formData.email);
+    console.log("Password:", formData.password);
+    // Add your login logic here
+  };
+
   return (
     <MDBContainer fluid>
       <MDBRow>
@@ -32,6 +54,9 @@ function App() {
               id="formControlLg"
               type="email"
               size="lg"
+              name="email"
+              onChange={handleInputChange}
+              value={formData.email}
             />
             <MDBInput
               wrapperClass="mb-4 mx-5 w-100"
@@ -39,9 +64,17 @@ function App() {
               id="formControlLg"
               type="password"
               size="lg"
+              name="password"
+              onChange={handleInputChange}
+              value={formData.password}
             />
 
-            <MDBBtn className="mb-4 px-5 mx-5 w-100" color="info" size="lg">
+            <MDBBtn
+              className="mb-4 px-5 mx-5 w-100"
+              color="info"
+              size="lg"
+              onClick={handleLogin}
+            >
               Login
             </MDBBtn>
             <p className="small mb-5 pb-lg-3 ms-5">
@@ -60,7 +93,7 @@ function App() {
 
         <MDBCol sm="6" className="d-none d-sm-block px-0">
           <img
-            src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-login-form/img3.webp"
+            src="https://image.winudf.com/v2/image1/Y29tLm1vYmlsZXVuaXZlcnNpdHkubXVzaWNfc2NyZWVuXzFfMTU0MzI5MzcwMF8wMTY/screen-1.webp?fakeurl=1&type=.webp"
             alt="Login"
             className="w-100"
             style={{ objectFit: "cover", objectPosition: "left" }}

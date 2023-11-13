@@ -1,17 +1,32 @@
+/* Navbar.module.css */
+
 .header {
-  max-width: 60rem;
-  margin: auto;
-  padding: 2rem;
+  background-color: #333;
+  color: #fff;
+  padding: 0.5rem; /* Decrease the padding */
+  text-align: center;
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
   display: flex;
   justify-content: center;
 }
 
-.list {
-  display: flex;
-  gap: 1rem;
+.list li {
+  margin: 0 10px;
 }
 
 .list a {
   text-decoration: none;
-  color: var(--color-primary-400);
+  color: #fff;
+  font-weight: bold;
+  font-size: 14px; /* Decrease the font size */
+  transition: color 0.3s ease;
+}
+
+.list a:hover {
+  color: #ff5733;
 }

@@ -1,0 +1,58 @@
+.home-container {
+  /* background-image: url("https://support.musicgateway.com/wp-content/uploads/2021/04/Copy-of-800-x-500-Blog-Post-69.jpg");
+  background-size: cover; */
+  background-image: url("https://img.freepik.com/premium-photo/orange-guitar-blue-speakers-amid-balls-tape-pink-backdrop-generative-ai_786587-8763.jpg");
+  background-size: cover;
+  background-repeat: no-repeat;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center; /* Center text within the container */
+}
+
+.highlighted-text {
+  color: #ff5733;
+  font-weight: bold;
+  font-size: 2em; /* Adjust the font size for better visibility */
+  margin-bottom: 20px; /* Add some spacing below the highlighted text */
+}
+
+.description {
+  color: #ffffff; /* Set text color to white or a color that suits your design */
+  max-width: 600px; /* Limit the width of the description for better readability */
+  margin-bottom: 30px; /* Add some spacing below the description */
+}
+
+.cta-container {
+  display: flex;
+  gap: 20px; /* Add spacing between CTA elements */
+}
+
+.cta-button {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: #ff5733;
+  color: #ffffff;
+  text-decoration: none;
+  border-radius: 5px;
+  font-weight: bold;
+  font-size: 1.2em;
+  transition: background-color 0.3s ease; /* Add a smooth transition effect */
+}
+
+.cta-button:hover {
+  background-color: #e64a2e; /* Change the background color on hover */
+}
+
+.cta-link {
+  color: #ff5733;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 1.2em;
+}
+
+.cta-link:hover {
+  text-decoration: underline; /* Add underline on hover for the link */
+}

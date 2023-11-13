@@ -10,6 +10,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Chatbot from "./components/chat/chat";
 import RootLayout from "./components/root/root";
 import Login from "./components/login/login";
+import SpotifyComponent from "./components/spotify/spotify";
 
 const router = createBrowserRouter([
   {
@@ -19,6 +20,12 @@ const router = createBrowserRouter([
       { path: "/", element: <Home /> },
       { path: "/chat", element: <Chatbot /> },
       { path: "/login", element: <Login /> },
+      {
+        path: "/spotify",
+        element: (
+          <SpotifyComponent username="yourUsername" password="yourPassword" />
+        ),
+      },
     ],
   },
 ]);
