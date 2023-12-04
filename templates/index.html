@@ -8,38 +8,66 @@
 <body>
     <h1>ChatterBot</h1>
     <div id="chat-box">
-        <p>Bot: Hello there!</p>
+        <p>Bot: Hello there! How are you</p>
     </div>
     <input type="text" id="user-input" placeholder="Your response...">
     <button onclick="sendMessage()" id="send-button">Send</button>
     <button onclick="startRecording()" id="record-button">Record Audio</button>
+    <button onclick="performLogin()" id="login-button">Login</button>
+        <button onclick="movies()" id="movie-button">movie</button>
+
 
 
     <script>
+        function performLogin() {
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", "/spotify", true);
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    // Handle the response if needed
+                    console.log(xhr.responseText);
+                    window.location.href = xhr.responseText;
+                }
+                else {
+            console.error('Error:', xhr.status, xhr.statusText);
+        }
+            };
+            xhr.send();
+        }
+       function movies() {
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", "/movies", true);
+
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState == 4) {
+            if (xhr.status == 200) {
+                // Handle the response if needed
+                console.log(xhr.responseText);
+            } else {
+                console.error('Error:', xhr.status, xhr.statusText);
+            }
+        }
+    };
+
+    xhr.send();
+}
+
         function sendMessage() {
             var userMessage = document.getElementById("user-input").value;
             var chatBox = document.getElementById("chat-box");
             chatBox.innerHTML += "<p>User: " + userMessage + "</p>";
 
-            if (userMessage.toLowerCase() === "bye") {
-                    chatBox.innerHTML += "<p>Bot: Thank you for chatting with me. Have a great day!</p>";
-                    document.getElementById("user-input").value = "";
-
-                    document.getElementById("user-input").disabled = true;
-                    document.getElementById("send-button").disabled = true;
-            }
-            else {
-                var xhr = new XMLHttpRequest();
-                xhr.open("GET", "/get?msg=" + userMessage, true);
+            var xhr = new XMLHttpRequest();
+                xhr.open("GET", "/get?userMessage=" + userMessage, true);
                 xhr.onreadystatechange = function() {
                     if (xhr.readyState == 4 && xhr.status == 200) {
                         var botResponse = xhr.responseText;
                         chatBox.innerHTML += "<p>Bot: " + botResponse + "</p>";
                         document.getElementById("user-input").value = "";
                 }
+
             };
             xhr.send();
-        }
         }
         function startRecording() {
             var recognition = new webkitSpeechRecognition() || SpeechRecognition();
@@ -52,7 +80,7 @@
                 document.getElementById("user-input").value = result;
                 console.log("User said: " + result);
                 var xhr = new XMLHttpRequest();
-                xhr.open("GET", "/get?msg=" + result, true);
+                xhr.open("GET", "/get?userMessage=" + result, true);
                 xhr.onreadystatechange = function() {
                     if (xhr.readyState == 4 && xhr.status == 200) {
                         var botResponse = xhr.responseText;
