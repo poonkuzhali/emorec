@@ -1,23 +1,18 @@
-import pickle
-import re
-
-import numpy as np
-from flask import Flask, render_template, jsonify, request, redirect
+import openai
+from flask import Flask, render_template, jsonify, request
 from flask_cors import CORS, cross_origin
 from keras.models import load_model
-from keras.src.utils import pad_sequences
-import openai
 
-from integrations.spotify_integration import login_spotify, callback
+from integrations.spotify_integration import login_spotify, callback, get_tracks
+from integrations.tmdb_integration import discover_movies
+from sentiment_model.prediction import get_emotions
 
 app = Flask(__name__)
 
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
 loaded_model = load_model('./sentiment_model/Emotion_Recognition.h5')
-
-openai.api_key = "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"
-
+openai.api_key = "REPLACE OPENAI KEY HERE"
 messages = [
     {"role": "system", "content": "Interact with user and ask them about their day and what they have been upto. Limit your response to 20 words"}]
 userMessages = []
@@ -40,17 +35,20 @@ def index():
 @app.route('/get', methods=['GET'])
 @cross_origin()
 def get_bot_response():
-    message = request.args.get('userMessage')
-    if message.lower() == 'bye':
-        return get_emotions()
-    userMessages.append(message)
-    messages.append({"role": "user", "content": message if message else ""})
-    response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
-        messages=messages)
-    reply = response["choices"][0]["message"]["content"]
-    messages.append({"role": "assistant", "content": reply})
-    return reply
+    try:
+        message = request.args.get('userMessage')
+        if message.lower() == 'bye':
+            return get_emotions(loaded_model, userMessages)
+        userMessages.append(message)
+        messages.append({"role": "user", "content": message if message else ""})
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=messages)
+        reply = response["choices"][0]["message"]["content"]
+        messages.append({"role": "assistant", "content": reply})
+        return reply
+    except Exception as ex:
+        print(ex)
 
 @app.route('/spotify', methods=['GET'])
 @cross_origin()
@@ -59,35 +57,36 @@ def get_login_spotify():
     return auth_url
 
 @app.route('/callback')
+@cross_origin()
 def spotify_callback():
     if 'error' in request.args:
         return jsonify({"error": request.args['error']})
-
+    token_info = ''
     if 'code' in request.args:
         token_info = callback(request.args['code'])
 
     return token_info
 
-def get_emotions():
-    with open(r"./sentiment_model/labelEncoder.pickle", "rb") as input_file:
-        le = pickle.load(input_file)
-    with open(r"./sentiment_model/tokenizer.pickle", "rb") as input_file:
-        tokenizer = pickle.load(input_file)
+@app.route('/playlist')
+@cross_origin()
+def spotify_playlist():
+    try:
+        token = request.args.get('token')
+        emotion = request.args.get('emotion')
+        playlist_url = get_tracks(token, emotion)
+        return playlist_url
+    except Exception as ex:
+        print(ex)
 
-    sentence = ' '.join(userMessages)
-    print(sentence)
-    sentence = clean(sentence)
-    sentence = tokenizer.texts_to_sequences([sentence])
-    sentence = pad_sequences(sentence, maxlen=256, truncating='pre')
-    result = le.inverse_transform(np.argmax(loaded_model.predict(sentence), axis=-1))[0]
-    proba = np.max(loaded_model.predict(sentence))
-    print(f"{result} : {proba}\n\n")
-    return jsonify({"emotions": result})
-
-def clean(text):
-    text = re.sub(r'[^a-zA-Z ]', '', text)
-    text = text.lower()
-    return text
+@app.route('/movies')
+@cross_origin()
+def get_movies():
+    try:
+        emotion = request.args.get('emotion')
+        result = discover_movies(emotion)
+        return result
+    except Exception as ex:
+        print(ex)
 
 
 if __name__ == '__main__':

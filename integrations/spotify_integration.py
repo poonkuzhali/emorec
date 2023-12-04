@@ -8,8 +8,8 @@ import urllib.parse
 import secrets
 import string
 
-CLIENT_ID = 'c1d761fe921947378815d5270ed7c314'
-CLIENT_SECRET = '6fd9b1941d3f4c5eb85018dfdf31480d'
+CLIENT_ID = "REPLACE CLIENT ID HERE"
+CLIENT_SECRET = "REPLACE CLIENT SECRET HERE"
 
 REDIRECT_URI = 'http://localhost:5000/callback'
 
@@ -36,46 +36,56 @@ def base64urlencode(a):
 
 code_verifier = generate_random_string(64)
 def login_spotify():
-    hashed = sha256(code_verifier)
-    code_challenge = base64urlencode(hashed)
+    try:
+        hashed = sha256(code_verifier)
+        code_challenge = base64urlencode(hashed)
 
-    scope = 'user-read-private user-read-email user-top-read user-follow-read playlist-modify-public playlist-modify-private'
+        scope = 'user-read-private user-read-email user-top-read user-follow-read playlist-modify-public playlist-modify-private'
 
-    params = {
-        'response_type': 'code',
-        'client_id': CLIENT_ID,
-        'scope': scope,
-        'code_challenge_method': 'S256',
-        'code_challenge': code_challenge,
-        'redirect_uri': REDIRECT_URI,
-    }
+        params = {
+            'response_type': 'code',
+            'client_id': CLIENT_ID,
+            'scope': scope,
+            'code_challenge_method': 'S256',
+            'code_challenge': code_challenge,
+            'redirect_uri': REDIRECT_URI,
+        }
 
-
-    auth_url = f"{AUTH_URL}?{urllib.parse.urlencode(params)}"
-    return auth_url
+        auth_url = f"{AUTH_URL}?{urllib.parse.urlencode(params)}"
+        return auth_url
+    except Exception as ex:
+        print(ex)
 
 client_creds = f'{CLIENT_ID}:{CLIENT_SECRET}'
 b64_client_creds = base64.b64encode(client_creds.encode())
 
 def callback(code):
-    req_body = {
-        'code': code,
-        'grant_type': 'authorization_code',
-        'redirect_uri': REDIRECT_URI,
-        'client_id': CLIENT_ID,
-        # 'client_secret': CLIENT_SECRET,
-        'code_verifier': code_verifier
-    }
+    try:
+        req_body = {
+            'code': code,
+            'grant_type': 'authorization_code',
+            'redirect_uri': REDIRECT_URI,
+            'client_id': CLIENT_ID,
+            'code_verifier': code_verifier
+        }
 
-    response = requests.post(TOKEN_URL, data=req_body, headers= {'Content-Type': 'application/x-www-form-urlencoded',
-                                                                 'Authorization': f'Basic {b64_client_creds.decode()}',})
-    token_info = response.json()
-    token = token_info['access_token']
-    top_artists_name, top_artists_id =get_users_favorite_artists(token)
-    top_tracks = get_artists_top_tracks(top_artists_id, token)
-    recommended_tracks = get_recommendations(top_tracks, token)
-    playlist_uri = create_playlist(token, recommended_tracks)
-    return f'https://open.spotify.com/playlist/{playlist_uri}'
+        response = requests.post(TOKEN_URL, data=req_body, headers={'Content-Type': 'application/x-www-form-urlencoded',
+                                                                    'Authorization': f'Basic {b64_client_creds.decode()}', })
+        token_info = response.json()
+        token = token_info['access_token']
+        return token
+    except Exception as ex:
+        print(ex)
+
+def get_tracks(token, emotion):
+    try:
+        top_artists_name, top_artists_id = get_users_favorite_artists(token)
+        top_tracks = get_artists_top_tracks(top_artists_id, token)
+        recommended_tracks = get_recommendations(top_tracks, token, emotion)
+        playlist_uri = create_playlist(token, recommended_tracks, emotion)
+        return f'https://open.spotify.com/playlist/{playlist_uri}'
+    except Exception as ex:
+        print(ex)
 
 
 def get_users_favorite_artists(token):
@@ -96,8 +106,6 @@ def get_users_favorite_artists(token):
         if item['name'] not in top_artists_name:
             top_artists_name.append(item['name'])
             top_artists_id.append(item['id'])
-
-    print(top_artists_name)
 
     return top_artists_name, top_artists_id
 
@@ -126,7 +134,7 @@ def create_playlist(token, track_uris, emotion):
     print('UserId')
     print(user_id)
     body = {
-    "name": "Emorec playlist",
+    "name": f"Emorec playlist - {emotion}",
     "description": "Playlist created for your current mood",
     "public": False
 }
@@ -146,13 +154,11 @@ def create_playlist(token, track_uris, emotion):
     print(response)
     return playlist_id
 
-def get_recommendations(top_tracks, token, emotion='anger'):
+def get_recommendations(top_tracks, token, emotion):
     def group(seq, size):
         return (seq[pos:pos + size] for pos in range(0, len(seq), size))
-    print('reco')
     recommended_tracks = []
     random.shuffle(top_tracks)
-    print(len(top_tracks))
     for tracks in list(group(top_tracks, 50)):
         audio_features = get_tracks_audio_features(tracks, token)
         for audio_feature in audio_features:
@@ -173,7 +179,8 @@ def get_recommendations(top_tracks, token, emotion='anger'):
                     recommended_tracks.append(audio_feature['uri'])
 
 
-    print(recommended_tracks)
+    if len(recommended_tracks) > 30:
+        recommended_tracks = recommended_tracks[:30]
 
     return recommended_tracks
 

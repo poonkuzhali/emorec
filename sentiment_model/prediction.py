@@ -1,14 +1,28 @@
-from sentiment_model.emotion_detection import preprocess, encoding, Glove, enc
+import pickle
+import re
+
+from flask import jsonify
+from keras.src.utils import pad_sequences
 import numpy as np
 
 
-def predict_emotions(user_messages, loaded_model):
-    emotion = []
-    for msg in user_messages:
-        text = preprocess(msg)
-        text = encoding(text, Glove)
-        text = np.array(text)
-        sentiment = loaded_model.predict(text)[0]
-        label = np.argmax(sentiment)
-        emotion.append(enc.categories_[0][label])
-    return emotion
+def get_emotions(loaded_model, userMessages):
+    with open(r"./sentiment_model/labelEncoder.pickle", "rb") as input_file:
+        le = pickle.load(input_file)
+    with open(r"./sentiment_model/tokenizer.pickle", "rb") as input_file:
+        tokenizer = pickle.load(input_file)
+
+    sentence = ' '.join(userMessages)
+    print(sentence)
+    sentence = clean(sentence)
+    sentence = tokenizer.texts_to_sequences([sentence])
+    sentence = pad_sequences(sentence, maxlen=256, truncating='pre')
+    result = le.inverse_transform(np.argmax(loaded_model.predict(sentence), axis=-1))[0]
+    proba = np.max(loaded_model.predict(sentence))
+    print(f"{result} : {proba}\n\n")
+    return jsonify({"emotions": result})
+
+def clean(text):
+    text = re.sub(r'[^a-zA-Z ]', '', text)
+    text = text.lower()
+    return text
