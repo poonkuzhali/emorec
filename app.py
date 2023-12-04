@@ -1,3 +1,5 @@
+import os
+
 import openai
 from flask import Flask, render_template, jsonify, request
 from flask_cors import CORS, cross_origin
@@ -12,7 +14,7 @@ app = Flask(__name__)
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
 loaded_model = load_model('./sentiment_model/Emotion_Recognition.h5')
-openai.api_key = "REPLACE OPENAI KEY HERE"
+openai.api_key = os.getenv("OPENAI_KEY")
 messages = [
     {"role": "system", "content": "Interact with user and ask them about their day and what they have been upto. Limit your response to 20 words"}]
 userMessages = []

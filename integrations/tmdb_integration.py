@@ -1,3 +1,5 @@
+import os
+
 import requests
 
 
@@ -7,7 +9,7 @@ def discover_movies(emotion):
 
         headers = {
             "accept": "application/json",
-            "Authorization": "REPLACE AUTH TOKEN HERE"
+            "Authorization": f"Bearer {os.getenv('TMDB_BEARER_TOKEN')}"
         }
 
         if emotion == 'sadness':

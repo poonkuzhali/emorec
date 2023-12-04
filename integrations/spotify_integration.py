@@ -1,5 +1,6 @@
 import base64
 import hashlib
+import os
 import random
 
 import requests
@@ -8,8 +9,8 @@ import urllib.parse
 import secrets
 import string
 
-CLIENT_ID = "REPLACE CLIENT ID HERE"
-CLIENT_SECRET = "REPLACE CLIENT SECRET HERE"
+CLIENT_ID = os.getenv("CLIENT_ID")
+CLIENT_SECRET = os.getenv("CLIENT_SECRET")
 
 REDIRECT_URI = 'http://localhost:5000/callback'
 
