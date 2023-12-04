@@ -1,12 +1,12 @@
 import base64
 import hashlib
+import random
 
 import requests
 import urllib.parse
 
 import secrets
 import string
-
 
 CLIENT_ID = 'c1d761fe921947378815d5270ed7c314'
 CLIENT_SECRET = '6fd9b1941d3f4c5eb85018dfdf31480d'
@@ -18,6 +18,7 @@ TOKEN_URL = 'https://accounts.spotify.com/api/token'
 BASE_URL = 'https://api.spotify.com/v1'
 TOP_ARTISTS = '/me/top/artists'
 FOLLOWING = '/me/following'
+AUDIO_FEATURES = '/audio-features'
 
 
 def generate_random_string(length):
@@ -38,7 +39,7 @@ def login_spotify():
     hashed = sha256(code_verifier)
     code_challenge = base64urlencode(hashed)
 
-    scope = 'user-read-private user-read-email user-top-read user-follow-read'
+    scope = 'user-read-private user-read-email user-top-read user-follow-read playlist-modify-public playlist-modify-private'
 
     params = {
         'response_type': 'code',
@@ -69,16 +70,18 @@ def callback(code):
     response = requests.post(TOKEN_URL, data=req_body, headers= {'Content-Type': 'application/x-www-form-urlencoded',
                                                                  'Authorization': f'Basic {b64_client_creds.decode()}',})
     token_info = response.json()
-    print(token_info['access_token'])
-    top_artists_name, top_artists_id =get_users_favorite_artists(token_info['access_token'])
-    get_recommendations(top_artists_id, token_info['access_token'])
-    return token_info
+    token = token_info['access_token']
+    top_artists_name, top_artists_id =get_users_favorite_artists(token)
+    top_tracks = get_artists_top_tracks(top_artists_id, token)
+    recommended_tracks = get_recommendations(top_tracks, token)
+    playlist_uri = create_playlist(token, recommended_tracks)
+    return f'https://open.spotify.com/playlist/{playlist_uri}'
 
 
 def get_users_favorite_artists(token):
     top_artists_name = []
     top_artists_id = []
-    response = requests.get(f'{BASE_URL}{TOP_ARTISTS}', headers={'Authorization': f'Bearer {token}'})
+    response = requests.get(f'{BASE_URL}{TOP_ARTISTS}?limit=20', headers={'Authorization': f'Bearer {token}'})
     response_json = response.json()
 
     for item in response_json['items']:
@@ -86,34 +89,91 @@ def get_users_favorite_artists(token):
             top_artists_name.append(item['name'])
             top_artists_id.append(item['id'])
 
-    response = requests.get(f'{BASE_URL}{FOLLOWING}?type=artist', headers={'Authorization': f'Bearer {token}'})
+    response = requests.get(f'{BASE_URL}{FOLLOWING}?type=artist&imit=50', headers={'Authorization': f'Bearer {token}'})
     response_json = response.json()
 
-    print('top artists')
     for item in response_json['artists']['items']:
         if item['name'] not in top_artists_name:
             top_artists_name.append(item['name'])
             top_artists_id.append(item['id'])
 
+    print(top_artists_name)
+
     return top_artists_name, top_artists_id
 
 def get_artists_top_tracks(top_artists, token):
-    top_tracks_id = []
+    top_tracks = []
     for artist in top_artists:
-        response = requests.get(f'{BASE_URL}/artists/{artist}/top-tracks', headers={'Authorization': f'Bearer {token}'})
+        response = requests.get(f'{BASE_URL}/artists/{artist}/top-tracks?market=US&limit=50', headers={'Authorization': f'Bearer {token}'})
         response_info = response.json()
         tracks_info = response_info['tracks']
         for track in tracks_info:
-            top_tracks_id.append(track['id'])
+            top_tracks.append(track)
+    print('Top tracks')
+    return top_tracks
 
-    return top_tracks_id
+def get_tracks_audio_features(tracks, token):
+    ids = ','.join(track['id'] for track in tracks)
+    response = requests.get(f'{BASE_URL}{AUDIO_FEATURES}?ids={ids}',
+                            headers={'Authorization': f'Bearer {token}'})
+    response_info = response.json()
+    return response_info['audio_features']
 
-def get_recommendations(top_artists, token):
+
+def create_playlist(token, track_uris, emotion):
+    response = requests.get(f'{BASE_URL}/me', headers = {'Authorization': f'Bearer {token}'})
+    user_id = response.json()['id']
+    print('UserId')
+    print(user_id)
+    body = {
+    "name": "Emorec playlist",
+    "description": "Playlist created for your current mood",
+    "public": False
+}
+    response = requests.post(f'{BASE_URL}/users/{user_id}/playlists',
+                             headers={'Authorization': f'Bearer {token}', 'Content-Type': "application/json"}, json=body)
+    print(response)
+    playlist_id = response.json()['id']
+    playlist_uri = response.json()['uri']
+    body = {
+        "uris": track_uris,
+        "position": 0
+    }
+    response = requests.post(f'{BASE_URL}/playlists/{playlist_id}/tracks',
+                             headers={'Authorization': f'Bearer {token}', 'Content-Type': "application/json"},
+                             json=body)
+    print('tracks')
+    print(response)
+    return playlist_id
+
+def get_recommendations(top_tracks, token, emotion='anger'):
+    def group(seq, size):
+        return (seq[pos:pos + size] for pos in range(0, len(seq), size))
     print('reco')
-    seed_artists = ','.join(artist for artist in top_artists[:5])
-    response = requests.get(f'{BASE_URL}/recommendations?limit=20&market=US&seed_artists={seed_artists}&max_danceability=0.9', headers={'Authorization': f'Bearer {token}'})
-    json_ob = response.json()
+    recommended_tracks = []
+    random.shuffle(top_tracks)
+    print(len(top_tracks))
+    for tracks in list(group(top_tracks, 50)):
+        audio_features = get_tracks_audio_features(tracks, token)
+        for audio_feature in audio_features:
+            if emotion == 'joy': #upbeat
+                if audio_feature['valence'] > 0.8 and audio_feature['danceability'] > 0.6 and audio_feature['energy'] > 0.7:
+                    recommended_tracks.append(audio_feature['uri'])
+            elif emotion == 'sadness': #downbeat
+                if audio_feature['valence'] < 0.5 and audio_feature['danceability'] < 0.5 and audio_feature['energy'] < 0.5:
+                    recommended_tracks.append(audio_feature['uri'])
+            elif emotion == 'anger': #energetic
+                if audio_feature['valence'] < 0.5 and audio_feature['energy'] > 0.7:
+                    recommended_tracks.append(audio_feature['uri'])
+            elif emotion == 'love': #mellow
+                if audio_feature['valence'] > 0.7 and audio_feature['energy'] < 0.6 and audio_feature['danceability'] > 0.4:
+                    recommended_tracks.append(audio_feature['uri'])
+            elif emotion == 'surprise': #mellow
+                if audio_feature['loudness'] < 0.5 and audio_feature['valence'] > 0.8:
+                    recommended_tracks.append(audio_feature['uri'])
 
-    for track in json_ob['tracks']:
-        print(track['name'])
+
+    print(recommended_tracks)
+
+    return recommended_tracks
 
