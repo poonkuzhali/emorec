@@ -10,7 +10,7 @@ import secrets
 import string
 
 CLIENT_ID = os.getenv("CLIENT_ID")
-CLIENT_SECRET = os.getenv("CLIENT_SECRET")
+CLIENT_SECRET = os.environ.get("CLIENT_SECRET")
 
 REDIRECT_URI = 'http://localhost:5000/callback'
 
@@ -42,7 +42,7 @@ def login_spotify():
         code_challenge = base64urlencode(hashed)
 
         scope = 'user-read-private user-read-email user-top-read user-follow-read playlist-modify-public playlist-modify-private'
-
+        print(CLIENT_ID)
         params = {
             'response_type': 'code',
             'client_id': CLIENT_ID,

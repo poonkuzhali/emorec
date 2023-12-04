@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 import openai
 from flask import Flask, render_template, jsonify, request
@@ -8,13 +9,14 @@ from keras.models import load_model
 from integrations.spotify_integration import login_spotify, callback, get_tracks
 from integrations.tmdb_integration import discover_movies
 from sentiment_model.prediction import get_emotions
+from dotenv import load_dotenv
 
+load_dotenv()
 app = Flask(__name__)
-
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
 loaded_model = load_model('./sentiment_model/Emotion_Recognition.h5')
-openai.api_key = os.getenv("OPENAI_KEY")
+openai.api_key = os.environ.get("OPENAI_KEY")
 messages = [
     {"role": "system", "content": "Interact with user and ask them about their day and what they have been upto. Limit your response to 20 words"}]
 userMessages = []
