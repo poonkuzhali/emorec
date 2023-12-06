@@ -2,12 +2,12 @@ import base64
 import hashlib
 import os
 import random
-
-import requests
-import urllib.parse
-
 import secrets
 import string
+import urllib.parse
+import webbrowser
+
+import requests
 
 CLIENT_ID = os.getenv("CLIENT_ID")
 CLIENT_SECRET = os.environ.get("CLIENT_SECRET")
@@ -73,11 +73,11 @@ def callback(code, emotion):
                                                                     'Authorization': f'Basic {b64_client_creds.decode()}', })
         token_info = response.json()
         token = token_info['access_token']
-        uri = get_tracks(token, emotion)
-        return uri
+        url = get_tracks(token, emotion)
+        webbrowser.open(url)
+        return 'OK'
     except Exception as ex:
         print(ex)
-
 
 def get_tracks(token, emotion):
     try:

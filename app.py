@@ -6,7 +6,7 @@ from flask import Flask, render_template, jsonify, request
 from flask_cors import CORS, cross_origin
 from keras.models import load_model
 
-from integrations.spotify_integration import login_spotify, callback, get_tracks
+from integrations.spotify_integration import login_spotify, callback, get_tracks, get_uri
 from integrations.tmdb_integration import discover_movies
 from sentiment_model.prediction import get_emotions
 
@@ -70,19 +70,11 @@ def spotify_callback(emotion):
 
     return token_info
 
-@app.route('/token')
+@app.route('/playlist/<emotion>')
 @cross_origin()
-def get_token():
-    return get_token()
-
-
-@app.route('/playlist')
-@cross_origin()
-def spotify_playlist():
+def spotify_playlist(emotion):
     try:
         token = request.args.get('token')
-        emotion = request.args.get('emotion')
-
 
         print("Token:", token)
         print("emotion:", emotion)
