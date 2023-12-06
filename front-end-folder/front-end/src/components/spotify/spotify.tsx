@@ -11,6 +11,9 @@ interface SpotifyComponentProps {
 interface Artist {
   name: string;
 }
+const api = axios.create({
+  baseURL: " http://127.0.0.1:5000/",
+});
 
 const SpotifyComponent: React.FC<SpotifyComponentProps> = ({
   username,
@@ -22,12 +25,14 @@ const SpotifyComponent: React.FC<SpotifyComponentProps> = ({
   useEffect(() => {
     const fetchAccessToken = async () => {
       try {
-        const response = await axios.post("YOUR_BACKEND_API_URL/token", {
-          username,
-          password,
-        });
+        const response = await api.get("/spotify");
 
         const { access_token } = response.data;
+
+        console.log(response.data);
+
+        // redirect the user to the spotify login page
+        window.location.href = response.data;
 
         setAccessToken(access_token);
       } catch (error) {

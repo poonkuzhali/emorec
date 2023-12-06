@@ -1,6 +1,6 @@
+/* home.css */
+
 .home-container {
-  /* background-image: url("https://support.musicgateway.com/wp-content/uploads/2021/04/Copy-of-800-x-500-Blog-Post-69.jpg");
-  background-size: cover; */
   background-image: url("https://img.freepik.com/premium-photo/orange-guitar-blue-speakers-amid-balls-tape-pink-backdrop-generative-ai_786587-8763.jpg");
   background-size: cover;
   background-repeat: no-repeat;
@@ -9,25 +9,26 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  text-align: center; /* Center text within the container */
+  text-align: center;
+  margin: 0; /* Remove any default margin */
 }
 
 .highlighted-text {
   color: #ff5733;
   font-weight: bold;
-  font-size: 2em; /* Adjust the font size for better visibility */
-  margin-bottom: 20px; /* Add some spacing below the highlighted text */
+  font-size: 2em;
+  margin-bottom: 20px;
 }
 
 .description {
-  color: #ffffff; /* Set text color to white or a color that suits your design */
-  max-width: 600px; /* Limit the width of the description for better readability */
-  margin-bottom: 30px; /* Add some spacing below the description */
+  color: #ffffff;
+  max-width: 600px;
+  margin-bottom: 30px;
 }
 
 .cta-container {
   display: flex;
-  gap: 20px; /* Add spacing between CTA elements */
+  gap: 20px;
 }
 
 .cta-button {
@@ -39,11 +40,11 @@
   border-radius: 5px;
   font-weight: bold;
   font-size: 1.2em;
-  transition: background-color 0.3s ease; /* Add a smooth transition effect */
+  transition: background-color 0.3s ease;
 }
 
 .cta-button:hover {
-  background-color: #e64a2e; /* Change the background color on hover */
+  background-color: #e64a2e;
 }
 
 .cta-link {
@@ -54,5 +55,29 @@
 }
 
 .cta-link:hover {
-  text-decoration: underline; /* Add underline on hover for the link */
+  text-decoration: underline;
+}
+
+.h1 {
+  font-size: 20;
+}
+
+.home-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  height: 100vh;
+}
+
+.content-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.learn-more-container {
+  margin-bottom: 20px;
 }

@@ -71,16 +71,29 @@ def spotify_callback():
 
     return token_info
 
+
 @app.route('/playlist')
 @cross_origin()
 def spotify_playlist():
     try:
         token = request.args.get('token')
         emotion = request.args.get('emotion')
+
+
+        print("Token:", token)
+        print("emotion:", emotion)
+
+        # Assuming get_tracks returns a valid playlist URL
         playlist_url = get_tracks(token, emotion)
+
+        # Return a JSON response
+        # return jsonify({"playlist_url": playlist_url})
         return playlist_url
+
     except Exception as ex:
+        # Handle exceptions and return an error response
         print(ex)
+        return jsonify({"error": str(ex)}), 500
 
 @app.route('/movies')
 @cross_origin()

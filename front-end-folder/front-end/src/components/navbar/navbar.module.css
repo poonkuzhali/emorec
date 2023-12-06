@@ -1,10 +1,15 @@
 /* Navbar.module.css */
 
 .header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
   background-color: #333;
   color: #fff;
-  padding: 0.5rem; /* Decrease the padding */
+  padding: 0.5rem;
   text-align: center;
+  z-index: 1000; /* Ensure the navbar is on top of other content */
 }
 
 .list {

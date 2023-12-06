@@ -13,11 +13,11 @@ const Navbar: React.FC = () => {
               Home
             </Link>
           </li>
-          <li>
+          {/* <li>
             <Link to="/login" className={classes.link}>
               Login
             </Link>
-          </li>
+          </li> */}
           <li>
             <Link to="/chat" className={classes.link}>
               Chatbot

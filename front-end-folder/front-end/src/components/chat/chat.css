@@ -74,7 +74,7 @@
 
 /* Styles for the modal overlay */
 .custom-overlay {
-  background-color: rgba(0, 0, 0, 0.8);
+  background-color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
