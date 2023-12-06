@@ -6,7 +6,7 @@ from flask import Flask, render_template, jsonify, request
 from flask_cors import CORS, cross_origin
 from keras.models import load_model
 
-from integrations.spotify_integration import login_spotify, callback, get_tracks
+from integrations.spotify_integration import login_spotify, callback, get_tracks, get_token
 from integrations.tmdb_integration import discover_movies
 from sentiment_model.prediction import get_emotions
 
@@ -53,22 +53,27 @@ def get_bot_response():
     except Exception as ex:
         print(ex)
 
-@app.route('/spotify', methods=['GET'])
+@app.route('/spotify/<emotion>', methods=['GET'])
 @cross_origin()
-def get_login_spotify():
-    auth_url = login_spotify()
+def get_login_spotify(emotion):
+    auth_url = login_spotify(emotion)
     return auth_url
 
-@app.route('/callback')
+@app.route('/callback/<emotion>')
 @cross_origin()
-def spotify_callback():
+def spotify_callback(emotion):
     if 'error' in request.args:
         return jsonify({"error": request.args['error']})
     token_info = ''
     if 'code' in request.args:
-        token_info = callback(request.args['code'])
+        token_info = callback(request.args['code'], emotion)
 
     return token_info
+
+@app.route('/token')
+@cross_origin()
+def get_token():
+    return get_token()
 
 
 @app.route('/playlist')

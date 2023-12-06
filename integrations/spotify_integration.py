@@ -12,7 +12,7 @@ import string
 CLIENT_ID = os.getenv("CLIENT_ID")
 CLIENT_SECRET = os.environ.get("CLIENT_SECRET")
 
-REDIRECT_URI = 'http://localhost:5000/callback'
+REDIRECT_URI = 'http://localhost:5000/callback/'
 
 AUTH_URL = 'https://accounts.spotify.com/authorize'
 TOKEN_URL = 'https://accounts.spotify.com/api/token'
@@ -36,24 +36,22 @@ def base64urlencode(a):
     encoded_bytes = base64.urlsafe_b64encode(a).rstrip(b'=')
     return encoded_bytes.decode('utf-8').replace('+', '-').replace('/', '_')
 
-def login_spotify():
+def login_spotify(emotion):
     try:
         hashed = sha256(code_verifier)
         code_challenge = base64urlencode(hashed)
 
         scope = 'user-read-private user-read-email user-top-read user-follow-read playlist-modify-public playlist-modify-private'
-        print(CLIENT_ID)
         params = {
             'response_type': 'code',
             'client_id': CLIENT_ID,
             'scope': scope,
             'code_challenge_method': 'S256',
             'code_challenge': code_challenge,
-            'redirect_uri': REDIRECT_URI,
+            'redirect_uri': REDIRECT_URI + emotion,
         }
 
         auth_url = f"{AUTH_URL}?{urllib.parse.urlencode(params)}"
-        print(auth_url)
         return auth_url
     except Exception as ex:
         print(ex)
@@ -61,12 +59,12 @@ def login_spotify():
 client_creds = f'{CLIENT_ID}:{CLIENT_SECRET}'
 b64_client_creds = base64.b64encode(client_creds.encode())
 
-def callback(code):
+def callback(code, emotion):
     try:
         req_body = {
             'code': code,
             'grant_type': 'authorization_code',
-            'redirect_uri': REDIRECT_URI,
+            'redirect_uri': REDIRECT_URI + emotion,
             'client_id': CLIENT_ID,
             'code_verifier': code_verifier
         }
@@ -75,9 +73,11 @@ def callback(code):
                                                                     'Authorization': f'Basic {b64_client_creds.decode()}', })
         token_info = response.json()
         token = token_info['access_token']
-        return token
+        uri = get_tracks(token, emotion)
+        return uri
     except Exception as ex:
         print(ex)
+
 
 def get_tracks(token, emotion):
     try:
