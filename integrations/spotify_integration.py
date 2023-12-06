@@ -12,7 +12,7 @@ import string
 CLIENT_ID = os.getenv("CLIENT_ID")
 CLIENT_SECRET = os.environ.get("CLIENT_SECRET")
 
-REDIRECT_URI = 'http://localhost:5000/callback/'
+REDIRECT_URI = 'http://127.0.0.1:5000/callback/'
 
 AUTH_URL = 'https://accounts.spotify.com/authorize'
 TOKEN_URL = 'https://accounts.spotify.com/api/token'
