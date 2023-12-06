@@ -21,11 +21,12 @@ TOP_ARTISTS = '/me/top/artists'
 FOLLOWING = '/me/following'
 AUDIO_FEATURES = '/audio-features'
 
-
 def generate_random_string(length):
     possible_characters = string.ascii_letters + string.digits
     random_string = ''.join(secrets.choice(possible_characters) for _ in range(length))
     return random_string
+
+code_verifier = generate_random_string(64)
 
 def sha256(plain):
     encoder = plain.encode('utf-8')
@@ -35,7 +36,6 @@ def base64urlencode(a):
     encoded_bytes = base64.urlsafe_b64encode(a).rstrip(b'=')
     return encoded_bytes.decode('utf-8').replace('+', '-').replace('/', '_')
 
-code_verifier = generate_random_string(64)
 def login_spotify():
     try:
         hashed = sha256(code_verifier)
@@ -53,6 +53,7 @@ def login_spotify():
         }
 
         auth_url = f"{AUTH_URL}?{urllib.parse.urlencode(params)}"
+        print(auth_url)
         return auth_url
     except Exception as ex:
         print(ex)
@@ -138,12 +139,12 @@ def create_playlist(token, track_uris, emotion):
     "name": f"Emorec playlist - {emotion}",
     "description": "Playlist created for your current mood",
     "public": False
-}
+    }
     response = requests.post(f'{BASE_URL}/users/{user_id}/playlists',
                              headers={'Authorization': f'Bearer {token}', 'Content-Type': "application/json"}, json=body)
     print(response)
     playlist_id = response.json()['id']
-    playlist_uri = response.json()['uri']
+    # playlist_uri = response.json()['uri']
     body = {
         "uris": track_uris,
         "position": 0
@@ -175,7 +176,7 @@ def get_recommendations(top_tracks, token, emotion):
             elif emotion == 'love': #mellow
                 if audio_feature['valence'] > 0.7 and audio_feature['energy'] < 0.6 and audio_feature['danceability'] > 0.4:
                     recommended_tracks.append(audio_feature['uri'])
-            elif emotion == 'surprise': #mellow
+            elif emotion == 'surprise':
                 if audio_feature['loudness'] < 0.5 and audio_feature['valence'] > 0.8:
                     recommended_tracks.append(audio_feature['uri'])
 

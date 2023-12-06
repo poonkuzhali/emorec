@@ -1,7 +1,7 @@
 import os
-from pathlib import Path
 
 import openai
+from dotenv import load_dotenv
 from flask import Flask, render_template, jsonify, request
 from flask_cors import CORS, cross_origin
 from keras.models import load_model
@@ -9,7 +9,6 @@ from keras.models import load_model
 from integrations.spotify_integration import login_spotify, callback, get_tracks
 from integrations.tmdb_integration import discover_movies
 from sentiment_model.prediction import get_emotions
-from dotenv import load_dotenv
 
 load_dotenv()
 app = Flask(__name__)
