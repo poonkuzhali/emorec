@@ -18,10 +18,11 @@
 
 
 
+
     <script>
         function performLogin() {
             var xhr = new XMLHttpRequest();
-            xhr.open("GET", "/spotify", true);
+            xhr.open("GET", "/spotify/joy", true);
             xhr.onreadystatechange = function() {
                 if (xhr.readyState == 4 && xhr.status == 200) {
                     // Handle the response if needed
@@ -33,6 +34,7 @@
         }
             };
             xhr.send();
+
         }
        function movies() {
     var xhr = new XMLHttpRequest();
