@@ -28,6 +28,11 @@ const Navbar: React.FC = () => {
               Spotify
             </Link>
           </li>
+          <li>
+            <Link to="/movies" className={classes.link}>
+              Movies
+            </Link>
+          </li>
         </ul>
       </nav>
     </header>

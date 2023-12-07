@@ -62,10 +62,13 @@ def get_login_spotify(emotion):
 @app.route('/callback/<emotion>')
 @cross_origin()
 def spotify_callback(emotion):
+
+    print("emotion is ",emotion)
     if 'error' in request.args:
         return jsonify({"error": request.args['error']})
     token_info = ''
     if 'code' in request.args:
+        print('Request:',request.args['code'])
         token_info = callback(request.args['code'], emotion)
 
     return token_info

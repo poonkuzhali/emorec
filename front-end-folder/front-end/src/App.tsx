@@ -11,6 +11,7 @@ import Chatbot from "./components/chat/chat";
 import RootLayout from "./components/root/root";
 import Login from "./components/login/login";
 import SpotifyComponent from "./components/spotify/spotify";
+import MovieList from "./components/movies/movies";
 
 const router = createBrowserRouter([
   {
@@ -25,6 +26,10 @@ const router = createBrowserRouter([
         element: (
           <SpotifyComponent username="yourUsername" password="yourPassword" />
         ),
+      },
+      {
+        path: "/movies",
+        element: <MovieList movies={[]} />,
       },
     ],
   },
