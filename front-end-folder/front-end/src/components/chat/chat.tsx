@@ -13,14 +13,6 @@ interface Message {
   isUser: boolean;
 }
 
-interface ChatbotState {
-  messages: Message[];
-  userInput: string;
-  botOutput: string | null;
-  formSubmitted: boolean;
-  showModal: boolean;
-}
-
 const Chatbot: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [userInput, setUserInput] = useState<string>("");
@@ -88,14 +80,7 @@ const Chatbot: React.FC = () => {
       // Make API call to /spotify
       const response = await api.get(`/spotify/${emotionUser}`);
 
-      // window.location.href = response.data;
-
-      // Open the link in a new window
       window.open(response.data, "_blank");
-
-      // console.log(response.data);
-
-      // window.location.href = response.data;
 
       console.log(response.data);
     } catch (error) {
@@ -108,7 +93,13 @@ const Chatbot: React.FC = () => {
     try {
       // Make API call to /spotify
       const response = await api.get("/movies");
-      navigate("/movies", { state: { movies: response.data } });
+
+      // navigate("/movies", { state: { movies: response.data } });
+
+      // If you want to pass state, you can use localStorage or another mechanism to store the data
+      localStorage.setItem("moviesData", JSON.stringify(response.data));
+      // Open a new window with the "/movies" URL and pass the data as state
+      window.open("/movies", "_blank");
     } catch (error) {
       // Handle errors
       console.error("An error occurred:", error);

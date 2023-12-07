@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import "./MoviesList.css";
 
@@ -22,6 +22,16 @@ const MovieList: React.FC<MovieListProps> = ({ movies }) => {
 
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
   const [isModalOpen, setModalOpen] = useState<boolean>(false);
+  const [localStorageMovies, setLocalStorageMovies] = useState<Movie[]>([]);
+
+  useEffect(() => {
+    // Retrieve movies from localStorage
+    const storedMoviesData = localStorage.getItem("moviesData");
+    if (storedMoviesData) {
+      const parsedMoviesData = JSON.parse(storedMoviesData);
+      setLocalStorageMovies(parsedMoviesData);
+    }
+  }, []); // Empty dependency array means this effect runs only once after the initial render
 
   const handleCardClick = (movie: Movie) => {
     setSelectedMovie(movie);
@@ -35,7 +45,11 @@ const MovieList: React.FC<MovieListProps> = ({ movies }) => {
 
   return (
     <div className="movie-list-container">
-      {displayedMovies.map((movie: Movie) => (
+      {/* Use localStorageMovies if available, otherwise use displayedMovies */}
+      {(localStorageMovies.length > 0
+        ? localStorageMovies
+        : displayedMovies
+      ).map((movie: Movie) => (
         <div
           key={movie.id}
           className="movie-card"

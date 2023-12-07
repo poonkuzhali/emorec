@@ -23,16 +23,16 @@ const Navbar: React.FC = () => {
               Chatbot
             </Link>
           </li>
-          <li>
+          {/* <li>
             <Link to="/spotify" className={classes.link}>
               Spotify
             </Link>
-          </li>
-          <li>
+          </li> */}
+          {/* <li>
             <Link to="/movies" className={classes.link}>
               Movies
             </Link>
-          </li>
+          </li> */}
         </ul>
       </nav>
     </header>
